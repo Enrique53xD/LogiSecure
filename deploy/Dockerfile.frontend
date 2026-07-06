@@ -1,0 +1,4 @@
+# Frontend container — serves the React/Tailwind dashboard.
+# Placeholder: build steps TBD.
+
+FROM node:20-slim

@@ -1,0 +1,6 @@
+# Local on-premise orchestrator. Placeholder — services to be defined:
+# backend, frontend, postgres (PostGIS), kafka.
+
+version: "3.9"
+
+services: {}

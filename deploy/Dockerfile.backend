@@ -1,0 +1,4 @@
+# Backend container — optimized for AMD ROCm inference.
+# Placeholder: base image and build steps TBD once dependencies are finalized.
+
+FROM python:3.11-slim

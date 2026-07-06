@@ -1,0 +1,35 @@
+LogiSecure/
+│
+├── .gitignore               # Exclusion file (You already have it!)
+├── .env.example             # Environment variables template (You already have it!)
+├── README.md                # Main documentation and project pitch
+│
+├── backend/                 # 🐍 BACKEND CODE (Python & FastAPI)
+│   ├── config.py            # Pydantic file (You already have it!)
+│   ├── main.py              # FastAPI entry point
+│   ├── requirements.txt     # Python dependencies (Pip)
+│   │
+│   ├── api/                 # External API connections
+│   │   ├── traffic_air.py   # OpenSky Network integration
+│   │   ├── traffic_sea.py   # AISstream.io integration
+│   │   └── weather.py       # Open-Meteo integration
+│   │
+│   └── ai_agents/           # Local AI Engine (AMD ROCm)
+│       ├── router.py        # Agent logic and orchestration
+│       ├── database.py      # Local connection to company DB
+│       └── models/          # Local folder (EMPTY) for .gguf files
+│
+├── frontend/                # ⚛️ FRONTEND CODE (React & Tailwind)
+│   ├── package.json         # Node.js dependencies
+│   ├── tailwind.config.js   # Style configuration
+│   └── src/
+│       ├── components/      # Reusable web components
+│       │   ├── Dashboard.jsx# Executive dashboard
+│       │   └── MapView.jsx  # Global map (Leaflet / OpenStreetMap)
+│       └── App.jsx          # Main component
+│
+└── deploy/                  # 🐳 INFRASTRUCTURE AND DEPLOYMENT (DevOps)
+    ├── Dockerfile.backend   # Optimized container for AMD ROCm
+    ├── Dockerfile.frontend  # Container for the web interface
+    └── docker-compose.yml   # Local system orchestrator (On-Premise)
+

@@ -1,0 +1,19 @@
+# Core
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+
+# Data pipeline
+confluent-kafka
+psycopg2-binary
+sqlalchemy
+geoalchemy2
+
+# AI / Agentic framework
+langgraph
+llama-index
+
+# HTTP clients for external APIs
+httpx
+websockets
