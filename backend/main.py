@@ -17,7 +17,10 @@ logger = logging.getLogger(__name__)
 async def _run_air_polling() -> None:
     while True:
         try:
-            traffic_air.poll_and_publish()
+            # poll_and_publish() does blocking HTTP calls (httpx, sync) --
+            # run it off the event loop so a slow/hanging OpenSky request
+            # doesn't stall every other request the app is serving.
+            await asyncio.to_thread(traffic_air.poll_and_publish)
         except Exception:
             logger.warning("main: air polling iteration failed", exc_info=True)
         await asyncio.sleep(settings.air_poll_interval_seconds)

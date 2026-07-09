@@ -11,6 +11,7 @@ is on, no API key is configured, or the cache is empty).
 import asyncio
 import json
 import logging
+from datetime import datetime, timezone
 
 import websockets
 from fastapi import APIRouter
@@ -32,6 +33,19 @@ _kafka = KafkaBridge(settings.kafka_bootstrap_servers)
 _latest_by_mmsi: dict[str, TrafficEvent] = {}
 
 
+def _parse_aisstream_timestamp(time_utc: str | None) -> datetime:
+    """AISstream's `time_utc` is Go's default time.Time string, e.g.
+    "2022-12-29 18:22:32.318353 +0000 UTC" -- not valid ISO 8601 (the
+    trailing " UTC" and the space before the offset both break standard
+    parsers, pydantic included), so it needs an explicit format string."""
+    if time_utc:
+        try:
+            return datetime.strptime(time_utc, "%Y-%m-%d %H:%M:%S.%f %z UTC")
+        except ValueError:
+            logger.warning("traffic_sea: unparseable time_utc=%r, using now()", time_utc)
+    return datetime.now(timezone.utc)
+
+
 def normalize_sea(raw_message: dict) -> TrafficEvent | None:
     meta = raw_message.get("MetaData") or {}
     position_report = (raw_message.get("Message") or {}).get("PositionReport") or {}
@@ -48,7 +62,7 @@ def normalize_sea(raw_message: dict) -> TrafficEvent | None:
         position=Position(lat=latitude, lon=longitude),
         heading=position_report.get("Cog"),
         speed=position_report.get("Sog"),
-        timestamp=meta.get("time_utc"),
+        timestamp=_parse_aisstream_timestamp(meta.get("time_utc")),
         raw={"ship_name": meta.get("ShipName")},
     )
 
@@ -67,8 +81,11 @@ async def run_sea_ingestion() -> None:
             async with websockets.connect(STREAM_URL) as ws:
                 await ws.send(json.dumps(subscribe_message))
                 async for raw in ws:
-                    message = json.loads(raw)
-                    event = normalize_sea(message)
+                    try:
+                        event = normalize_sea(json.loads(raw))
+                    except Exception:
+                        logger.warning("traffic_sea: dropping unparseable message", exc_info=True)
+                        continue
                     if event is not None:
                         _latest_by_mmsi[event.vehicle_id] = event
                         _kafka.produce_event(TRAFFIC_SEA, event)
