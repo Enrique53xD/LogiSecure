@@ -32,5 +32,13 @@ def init_db() -> None:
         import db.models  # noqa: F401  (registers models on Base.metadata)
 
         Base.metadata.create_all(bind=engine)
+
+        from db.seed import seed_if_empty
+
+        db = SessionLocal()
+        try:
+            seed_if_empty(db)
+        finally:
+            db.close()
     except Exception:
         logger.warning("init_db: database unreachable, continuing without it", exc_info=True)

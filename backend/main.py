@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api import traffic_air, traffic_sea
+from api import alerts, shipments, traffic_air, traffic_sea
 from api.traffic_sea import run_sea_ingestion
 from config import settings
 from db.session import init_db
@@ -45,6 +45,8 @@ app = FastAPI(title="LogiSecure API", lifespan=lifespan)
 
 app.include_router(traffic_air.router)
 app.include_router(traffic_sea.router)
+app.include_router(shipments.router)
+app.include_router(alerts.router)
 
 
 @app.get("/health")

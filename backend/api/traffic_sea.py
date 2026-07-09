@@ -11,6 +11,7 @@ is on, no API key is configured, or the cache is empty).
 import asyncio
 import json
 import logging
+import re
 from datetime import datetime, timezone
 
 import websockets
@@ -33,16 +34,28 @@ _kafka = KafkaBridge(settings.kafka_bootstrap_servers)
 _latest_by_mmsi: dict[str, TrafficEvent] = {}
 
 
+_TIME_UTC_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\.(\d+) \+0000 UTC$")
+
+
 def _parse_aisstream_timestamp(time_utc: str | None) -> datetime:
     """AISstream's `time_utc` is Go's default time.Time string, e.g.
-    "2022-12-29 18:22:32.318353 +0000 UTC" -- not valid ISO 8601 (the
+    "2022-12-29 18:22:32.318353318 +0000 UTC" -- not valid ISO 8601 (the
     trailing " UTC" and the space before the offset both break standard
-    parsers, pydantic included), so it needs an explicit format string."""
+    parsers, pydantic included), so it needs an explicit format string.
+    Go also emits nanosecond precision (up to 9 fractional digits) while
+    Python's %f only accepts up to 6, so the fractional part is truncated
+    before parsing."""
     if time_utc:
-        try:
-            return datetime.strptime(time_utc, "%Y-%m-%d %H:%M:%S.%f %z UTC")
-        except ValueError:
-            logger.warning("traffic_sea: unparseable time_utc=%r, using now()", time_utc)
+        match = _TIME_UTC_RE.match(time_utc)
+        if match:
+            base, fraction = match.groups()
+            try:
+                return datetime.strptime(
+                    f"{base}.{fraction[:6]} +0000 UTC", "%Y-%m-%d %H:%M:%S.%f %z UTC"
+                )
+            except ValueError:
+                pass
+        logger.warning("traffic_sea: unparseable time_utc=%r, using now()", time_utc)
     return datetime.now(timezone.utc)
 
 
