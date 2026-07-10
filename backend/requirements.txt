@@ -13,6 +13,8 @@ geoalchemy2
 # AI / Agentic framework
 langgraph
 llama-index
+# Optional for on-prem ROCm inference (install on cloud GPU host):
+# llama-cpp-python
 
 # HTTP clients for external APIs
 httpx

@@ -6,9 +6,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api import alerts, shipments, traffic_air, traffic_sea
+from api import ai, alerts, shipments, traffic_air, traffic_sea
 from api.traffic_sea import run_sea_ingestion
 from config import settings
+from ai_agents.inference import get_inference
 from db.session import init_db
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ async def _run_air_polling() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    get_inference().load()
 
     background_tasks: list[asyncio.Task] = []
     if not settings.use_mocks:
@@ -47,6 +49,7 @@ app.include_router(traffic_air.router)
 app.include_router(traffic_sea.router)
 app.include_router(shipments.router)
 app.include_router(alerts.router)
+app.include_router(ai.router)
 
 
 @app.get("/health")

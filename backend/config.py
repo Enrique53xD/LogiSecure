@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     rocm_visible_devices: str = "0"
     local_model_path: str = "backend/ai_agents/models/llama-3.1-8b.gguf"
 
+    ai_mock_mode: bool = True
+    n_gpu_layers: int = 35
+    max_tokens: int = 1024
+    model_context_size: int = 4096
+
     class Config:
         env_file = ".env"
 
