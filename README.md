@@ -48,10 +48,15 @@ on each subsystem.
 
 ## Status
 
-Backend: Steps 1 to 3 of the workflow (monitoring, incident detection, local
-asset correlation) are implemented and tested against real Postgres+PostGIS
-and Kafka, plus live OpenSky and AISstream data. See `backend/README.md` for
-full setup and testing instructions.
+Backend: Steps 1–3 (monitoring, incident detection, local asset correlation) plus
+frontend dashboard integration and on-prem AI pipeline (mock mode) are implemented.
 
-Not yet implemented: the weather connector, the AI/agentic track (Steps 4
-and 5), and the frontend dashboard/map.
+| Area | Status |
+|------|--------|
+| Air / sea traffic | Done |
+| Weather (Open-Meteo) | Done |
+| Dashboard sync API | Done |
+| AI Copilot UI + `/agent-analyze` | Done |
+| LangGraph orchestration | Done (mock inference) |
+| Docker demo stack | Done |
+| ROCm GPU inference | Pending (last step) |

@@ -16,14 +16,14 @@ import {
 
 const NAV = [
   { icon: LayoutGrid, label: "Overview", badge: null, path: "/" },
-  { icon: Map, label: "Live Map", badge: "LIVE", path: "/live-map" },
-  { icon: Plane, label: "Air Fleet", badge: null, path: "/air-fleet" },
-  { icon: Ship, label: "Maritime", badge: null, path: "/maritime" },
-  { icon: Truck, label: "Ground", badge: null, path: "/ground" },
-  { icon: Satellite, label: "Telemetry", badge: null, path: "/telemetry" },
-  { icon: ShieldAlert, label: "Risk & Alerts", badge: "3", path: "/risk-alerts" },
+  { icon: Map, label: "Live Map", badge: "LIVE", path: "/" },
+  { icon: Plane, label: "Air Fleet", badge: null, path: "/" },
+  { icon: Ship, label: "Maritime", badge: null, path: "/" },
+  { icon: Truck, label: "Ground", badge: null, path: "/" },
+  { icon: Satellite, label: "Telemetry", badge: null, path: "/" },
+  { icon: ShieldAlert, label: "Risk & Alerts", badge: "3", path: "/" },
   { icon: Sparkles, label: "AI Copilot", badge: null, path: "/ai-copilot" },
-  { icon: Database, label: "Data Streams", badge: null, path: "/data-streams" },
+  { icon: Database, label: "Data Streams", badge: null, path: "/" },
 ];
 
 export function Sidebar() {

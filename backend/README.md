@@ -20,15 +20,11 @@ This covers Steps 1 to 3 of the workflow described in `Project_proposition_LD.pd
    geospatial proximity query, so the system knows exactly which shipments
    are affected by an incident.
 
-Not implemented here (by design, other tracks):
+Not implemented here (deferred):
 
-- `backend/api/weather.py`: still a stub, pending to do. Follow the same
-  pattern as `traffic_air.py`/`traffic_sea.py`.
-- `backend/ai_agents/*`: local LLM impact simulation, rerouting, and
-  autonomous client communication (Steps 4 and 5 of the workflow). Pending,
-  part of the AI track.
-- Frontend dashboard and map (`frontend/src/components/`): still empty
-  placeholders.
+- `backend/api/weather.py`: **implemented** — Open-Meteo + mock fallback.
+- Autonomous fleet dispatch to real GPS/AIS/FMS operators (JSON payload only).
+- ROCm GPU inference on production hardware (mock mode works today).
 
 ## How it works
 
@@ -103,13 +99,23 @@ backend/
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/health` | liveness check |
-| GET | `/traffic/air` | live (or mock) aircraft positions |
-| GET | `/traffic/sea` | live (or mock) vessel positions |
-| GET | `/shipments` | confidential shipments from the on-prem DB (or mock) |
-| GET | `/assets` | company assets from the on-prem DB (or mock) |
-| POST | `/alerts` | report an incident, get back the correlated shipment ids |
-| GET | `/alerts` | most recent alerts, newest first |
+| GET | `/health` | Liveness check |
+| GET | `/traffic/air` | Live (or mock) aircraft positions |
+| GET | `/traffic/sea` | Live (or mock) vessel positions |
+| GET | `/traffic/land` | Active land shipments near HQ |
+| GET | `/weather` | HQ weather telemetry (Open-Meteo or mock) |
+| GET | `/shipments` | Confidential shipments (DB or mock) |
+| GET | `/assets` | Company assets (DB or mock) |
+| POST | `/alerts` | Report incident + correlated shipment ids |
+| GET | `/alerts` | Recent alerts |
+| GET | `/api/dashboard/sync` | Aggregated dashboard state for frontend |
+| GET | `/agent-status` | AI agent status (frontend contract) |
+| POST | `/agent-analyze` | AI incident analysis (frontend contract) |
+| GET | `/api/shipment/track/{id}` | Shipment tracking lookup |
+| GET | `/ai/health` | Model status |
+| POST | `/ai/analyze` | Full on-prem AI pipeline |
+| POST | `/ai/approve` | Human-in-the-loop plan approval |
+| POST | `/ai/orchestrate` | LangGraph Steps 1–5 pipeline |
 
 `POST /alerts` request body:
 

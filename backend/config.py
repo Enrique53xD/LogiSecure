@@ -18,6 +18,9 @@ class Settings(BaseSettings):
 
     open_meteo_base_url: str = "https://api.open-meteo.com/v1"
 
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
+    newsdata_api_key: str = ""
+
     cache_ttl_seconds: int = 60
 
     rocm_visible_devices: str = "0"

@@ -102,7 +102,7 @@ def normalize_air(raw_state: list) -> TrafficEvent | None:
         heading=true_track,
         speed=velocity,
         timestamp=time_position or last_contact,
-        raw={"icao24": icao24, "on_ground": on_ground},
+        raw={"icao24": icao24, "on_ground": on_ground, "origin_country": raw_state[2]},
     )
 
 

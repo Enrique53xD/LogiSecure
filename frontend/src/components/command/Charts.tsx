@@ -10,22 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const THROUGHPUT = Array.from({ length: 24 }, (_, i) => ({
-  h: `${i.toString().padStart(2, "0")}:00`,
-  air: 220 + Math.round(Math.sin(i * 0.5) * 40 + Math.random() * 30),
-  sea: 140 + Math.round(Math.cos(i * 0.4) * 30 + Math.random() * 20),
-  ground: 300 + Math.round(Math.sin(i * 0.3 + 1) * 60 + Math.random() * 40),
-}));
-
-const REGIONS = [
-  { r: "NA", v: 92 },
-  { r: "EU", v: 88 },
-  { r: "APAC", v: 76 },
-  { r: "LATAM", v: 81 },
-  { r: "MEA", v: 69 },
-  { r: "OCE", v: 85 },
-];
+import { useMemo } from "react";
+import { useLogisecure } from "@/hooks/useLogisecure";
 
 function TooltipCard({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -46,6 +32,25 @@ function TooltipCard({ active, payload, label }: any) {
 }
 
 export function ThroughputChart() {
+  const { data } = useLogisecure();
+  const airBase = data?.air_traffic?.flights?.length ?? 12;
+  const seaBase = data?.maritime_traffic?.data?.container_liners?.length ?? 8;
+  const groundBase =
+    data?.land_traffic?.data?.total_active ??
+    data?.land_traffic?.data?.active_land_shipments?.length ??
+    6;
+
+  const throughput = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        h: `${i.toString().padStart(2, "0")}:00`,
+        air: Math.max(1, Math.round(airBase * (0.65 + Math.sin(i * 0.45) * 0.2 + i / 48))),
+        sea: Math.max(1, Math.round(seaBase * (0.7 + Math.cos(i * 0.35) * 0.15 + i / 60))),
+        ground: Math.max(1, Math.round(groundBase * (0.75 + Math.sin(i * 0.3 + 1) * 0.18))),
+      })),
+    [airBase, seaBase, groundBase],
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -75,7 +80,7 @@ export function ThroughputChart() {
       </div>
       <div className="mt-3 h-[180px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={THROUGHPUT} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+          <AreaChart data={throughput} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="gAir" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor="oklch(0.78 0.18 220)" stopOpacity={0.55} />
@@ -105,6 +110,28 @@ export function ThroughputChart() {
 }
 
 export function RegionChart() {
+  const { data } = useLogisecure();
+  const air = data?.air_traffic?.flights?.length ?? 0;
+  const sea = data?.maritime_traffic?.data?.container_liners?.length ?? 0;
+  const land =
+    data?.land_traffic?.data?.total_active ??
+    data?.land_traffic?.data?.active_land_shipments?.length ??
+    0;
+  const threatLevel = (data?.geopolitical_threats?.summary?.threat_level ?? "LOW").toString();
+  const threatPenalty =
+    threatLevel === "CRITICAL" ? 22 : threatLevel === "HIGH" ? 14 : threatLevel === "MEDIUM" ? 8 : 0;
+
+  const regions = useMemo(
+    () => [
+      { r: "AIR", v: Math.min(100, 55 + air * 2 - threatPenalty) },
+      { r: "SEA", v: Math.min(100, 50 + sea * 2 - threatPenalty) },
+      { r: "LAND", v: Math.min(100, 58 + land * 4 - threatPenalty) },
+      { r: "OPS", v: Math.min(100, 92 - threatPenalty) },
+      { r: "RISK", v: Math.max(20, 100 - threatPenalty * 2) },
+    ],
+    [air, sea, land, threatPenalty],
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -122,7 +149,7 @@ export function RegionChart() {
       </div>
       <div className="mt-3 h-[180px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={REGIONS} margin={{ top: 10, right: 0, left: -20, bottom: 0 }} barSize={22}>
+          <BarChart data={regions} margin={{ top: 10, right: 0, left: -20, bottom: 0 }} barSize={22}>
             <defs>
               <linearGradient id="gBar" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor="oklch(0.82 0.15 205)" stopOpacity={0.95} />

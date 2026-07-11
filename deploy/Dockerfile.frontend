@@ -1,4 +1,17 @@
-# Frontend container — serves the React/Tailwind dashboard.
-# Placeholder: build steps TBD.
+FROM node:20-slim AS build
+
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ .
+ARG VITE_LOGISECURE_API=http://localhost:8000
+ENV VITE_LOGISECURE_API=$VITE_LOGISECURE_API
+RUN npm run build
 
 FROM node:20-slim
+WORKDIR /app
+COPY --from=build /app/package.json /app/package-lock.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/.output ./.output
+EXPOSE 3000
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "3000"]
