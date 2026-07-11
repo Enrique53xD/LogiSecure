@@ -1,0 +1,47 @@
+[
+  {
+    "id": "scenario-rotterdam-strike",
+    "title": "Port strike at Rotterdam",
+    "disruption_type": "port_strike",
+    "location": "Port of Rotterdam",
+    "coordinates": {"lat": 51.9244, "lon": 4.4777},
+    "severity": "high",
+    "description": "Dock workers' strike halting container loading at Europe's largest port."
+  },
+  {
+    "id": "scenario-south-china-sea-storm",
+    "title": "Typhoon in South China Sea",
+    "disruption_type": "storm",
+    "location": "South China Sea",
+    "coordinates": {"lat": 15.0, "lon": 115.0},
+    "severity": "critical",
+    "description": "Category 4 typhoon forcing vessel diversions and 48-hour port closures."
+  },
+  {
+    "id": "scenario-suez-blockage",
+    "title": "Suez Canal congestion",
+    "disruption_type": "canal_blockage",
+    "location": "Suez Canal",
+    "coordinates": {"lat": 29.9668, "lon": 32.5498},
+    "severity": "critical",
+    "description": "Multi-vessel grounding causing 72-hour queue at canal transit point."
+  },
+  {
+    "id": "scenario-dubai-congestion",
+    "title": "Dubai port congestion",
+    "disruption_type": "port_congestion",
+    "location": "Port of Dubai",
+    "coordinates": {"lat": 25.2769, "lon": 55.2962},
+    "severity": "medium",
+    "description": "Customs backlog and berth shortage delaying outbound Gulf cargo."
+  },
+  {
+    "id": "scenario-malacca-piracy",
+    "title": "Piracy alert — Malacca Strait",
+    "disruption_type": "piracy_alert",
+    "location": "Port of Singapore",
+    "coordinates": {"lat": 1.2644, "lon": 103.8200},
+    "severity": "high",
+    "description": "Maritime security advisory for armed escort requirement in strait transit."
+  }
+]

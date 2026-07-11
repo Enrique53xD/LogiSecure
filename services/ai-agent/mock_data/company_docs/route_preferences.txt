@@ -1,0 +1,24 @@
+LogiSecure Route Preferences — Operations Playbook
+
+Preferred alternate ports (Europe):
+  - Rotterdam disruption -> Antwerp (primary), Bremerhaven (overflow)
+  - Hamburg disruption -> Rotterdam or Amsterdam
+  - Amsterdam disruption -> Rotterdam or Zeebrugge
+
+Preferred alternate routes (Asia-Pacific):
+  - South China Sea storm -> hold Singapore or Hong Kong
+  - Malacca Strait advisory -> widen transit corridor via Lombok Strait if escort delayed
+  - Japan-Vancouver lane -> divert to Busan for hub transfer
+
+Middle East / Africa:
+  - Dubai congestion -> split at Jebel Ali or route via Salalah
+  - Suez blockage -> Cape of Good Hope (mandatory for non-urgent sea freight)
+
+Mode escalation matrix:
+  - CRITICAL + medical/semiconductor → air charter eligible
+  - HIGH + electronics → sea reroute first, air if delay > 72h
+  - MEDIUM/LOW → land/sea only unless client opts in to expedite
+
+Cost thresholds for auto-escalation to management:
+  - Financial exposure > $1M USD
+  - Delay > 96 hours on critical-priority manifest

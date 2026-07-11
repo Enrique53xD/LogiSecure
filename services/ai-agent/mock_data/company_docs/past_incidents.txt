@@ -1,0 +1,26 @@
+LogiSecure Past Incidents — Internal Knowledge Base
+
+2024-03 — Port of Rotterdam strike (14 days)
+  Affected: 23 shipments, $4.2M exposure.
+  Action: Rerouted via Antwerp; average delay 9 days.
+  Lesson: Pre-position trucking capacity at Belgian ports during labor negotiations.
+
+2024-07 — South China Sea typhoon season
+  Affected: 11 vessels, 8 shipments.
+  Action: Held at Singapore + Hong Kong; 2 air charters for medical cargo.
+  Lesson: Storm season playbook saved 18% vs. unplanned diversions.
+
+2023-11 — Suez Canal congestion (grounding event)
+  Affected: 6 shipments through Mediterranean corridor.
+  Action: Cape route for 4 vessels; 2 cancelled and re-booked via air for critical parts.
+  Lesson: Maintain dual-route contracts with carriers for canal-dependent lanes.
+
+2025-01 — Dubai customs backlog
+  Affected: 9 shipments, mostly Gulf hub transfers.
+  Action: Split manifests; partial unload at Jebel Ali satellite terminal.
+  Lesson: Congestion alerts trigger at 36-hour dwell time threshold.
+
+2024-09 — Malacca Strait security advisory
+  Affected: 3 high-value semiconductor shipments.
+  Action: Armed escort + night transit window; no cargo loss.
+  Lesson: Piracy alerts require immediate client notification even if reroute is minor.

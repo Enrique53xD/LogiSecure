@@ -1,0 +1,29 @@
+LogiSecure Shipping Policy — Confidential (On-Prem Only)
+
+1. Incident response SLA
+   - HIGH/CRITICAL disruptions: notify affected clients within 2 hours.
+   - MEDIUM disruptions: notify within 6 hours.
+   - All notifications require human approval before send.
+
+2. Port strike protocol
+   - Divert Rotterdam/Hamburg/Amsterdam cargo to Antwerp or Bremerhaven when berth
+     capacity allows.
+   - Prioritize shipments marked "critical" or value > $500,000 USD.
+   - Update fleet GPS and maritime AIS within 30 minutes of approved reroute.
+
+3. Storm / weather protocol
+   - Vessels in South China Sea or Pacific corridors must hold at nearest safe port
+     if Beaufort scale exceeds 8.
+   - Air-freight escalation allowed only for medical supplies and semiconductors.
+
+4. Suez Canal blockage
+   - Activate Cape of Good Hope alternate sea route.
+   - Expect +10-14 day delay; pre-draft client communications with revised ETA.
+
+5. Data confidentiality
+   - All impact analysis and rerouting runs on-prem via AMD ROCm.
+   - Zero cloud API calls for shipment manifests or client data.
+
+6. Human-in-the-loop
+   - No autonomous fleet dispatch without operations manager approval.
+   - Client emails are drafts only until explicitly approved in the dashboard.

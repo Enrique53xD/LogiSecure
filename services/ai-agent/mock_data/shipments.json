@@ -1,0 +1,50 @@
+[
+  {
+    "shipment_id": "SH-1001",
+    "current_location": "Port of Rotterdam",
+    "route_segment": "North Sea corridor",
+    "cargo": "electronics",
+    "value_usd": 250000,
+    "priority": "high"
+  },
+  {
+    "shipment_id": "SH-1002",
+    "current_location": "South China Sea",
+    "route_segment": "Singapore Strait approach",
+    "cargo": "textiles",
+    "value_usd": 80000,
+    "priority": "medium"
+  },
+  {
+    "shipment_id": "SH-1003",
+    "current_location": "Suez Canal",
+    "route_segment": "Mediterranean transit",
+    "cargo": "automotive parts",
+    "value_usd": 420000,
+    "priority": "critical"
+  },
+  {
+    "shipment_id": "SH-1004",
+    "current_location": "Port of Dubai",
+    "route_segment": "Persian Gulf hub",
+    "cargo": "medical supplies",
+    "value_usd": 150000,
+    "priority": "high"
+  },
+  {
+    "shipment_id": "SH-1005",
+    "current_location": "Port of Singapore",
+    "route_segment": "Malacca Strait",
+    "cargo": "semiconductors",
+    "value_usd": 900000,
+    "priority": "critical"
+  },
+  {
+    "shipment_id": "SH-1006",
+    "current_location": "Port of Hamburg",
+    "route_segment": "Elbe River approach",
+    "cargo": "industrial machinery",
+    "value_usd": 310000,
+    "priority": "medium"
+  }
+]
