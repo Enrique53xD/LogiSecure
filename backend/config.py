@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
     newsdata_api_key: str = ""
 
+    incident_scan_interval_seconds: int = 60
+    incident_cooldown_seconds: int = 1800
+
     cache_ttl_seconds: int = 60
 
     rocm_visible_devices: str = "0"

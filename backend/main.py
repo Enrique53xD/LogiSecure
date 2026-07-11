@@ -22,6 +22,7 @@ from api.traffic_sea import run_sea_ingestion
 from config import settings
 from ai_agents.inference import get_inference
 from db.session import init_db
+from ingestion import incident_detector
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,15 @@ async def _run_air_polling() -> None:
         await asyncio.sleep(settings.air_poll_interval_seconds)
 
 
+async def _run_incident_detection() -> None:
+    while True:
+        try:
+            await asyncio.to_thread(incident_detector.scan)
+        except Exception:
+            logger.warning("main: incident detection scan failed", exc_info=True)
+        await asyncio.sleep(settings.incident_scan_interval_seconds)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
@@ -44,6 +54,7 @@ async def lifespan(app: FastAPI):
     if not settings.use_mocks:
         background_tasks.append(asyncio.create_task(_run_air_polling()))
         background_tasks.append(asyncio.create_task(run_sea_ingestion()))
+    background_tasks.append(asyncio.create_task(_run_incident_detection()))
 
     yield
 

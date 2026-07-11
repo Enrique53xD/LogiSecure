@@ -3,21 +3,17 @@ workflow). POST /alerts is the integration point for any incident source --
 today that's manual/demo submission; once the weather connector (teammate's
 task) and later the AI agent exist, they call this same shape."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from ingestion import alerts_store
-from ingestion.correlation import correlate
-from ingestion.kafka_bridge import KafkaBridge
-from ingestion.topics import ALERTS
-from config import settings
+from ingestion.incidents import raise_alert
 from schemas.alert import DisruptionAlert
 from schemas.common import Position, Severity
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
-_kafka = KafkaBridge(settings.kafka_bootstrap_servers)
 
 
 class AlertIn(BaseModel):
@@ -30,20 +26,13 @@ class AlertIn(BaseModel):
 
 @router.post("", response_model=DisruptionAlert)
 def create_alert(alert_in: AlertIn):
-    related_shipment_ids = correlate(alert_in.location)
-
-    alert = DisruptionAlert(
+    return raise_alert(
         title=alert_in.title,
         description=alert_in.description,
         location=alert_in.location,
         severity=alert_in.severity,
-        timestamp=alert_in.timestamp or datetime.now(timezone.utc),
-        related_shipment_ids=related_shipment_ids,
+        timestamp=alert_in.timestamp,
     )
-
-    alerts_store.add(alert)
-    _kafka.produce_event(ALERTS, alert)
-    return alert
 
 
 @router.get("", response_model=list[DisruptionAlert])
