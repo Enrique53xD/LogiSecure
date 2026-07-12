@@ -3,6 +3,7 @@ import { Plane, Ship, Truck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useLogisecure } from "@/hooks/useLogisecure";
+import type { FleetTypeFilter } from "@/lib/dashboard-sections";
 
 type Row = {
   id: string;
@@ -34,53 +35,68 @@ function mapLandStatus(status?: string): Row["status"] {
   return "On time";
 }
 
-export function FleetTable() {
+export function FleetTable({ typeFilter = "all" }: { typeFilter?: FleetTypeFilter }) {
   const { data } = useLogisecure();
 
   const rows = useMemo<Row[]>(() => {
     const built: Row[] = [];
 
-    for (const flight of data?.air_traffic?.flights?.slice(0, 3) ?? []) {
-      built.push({
-        id: flight.callsign || "AIR",
-        type: "air",
-        origin: coordLabel(flight.lat, flight.lng),
-        dest: flight.origin || "en-route",
-        eta: "live",
-        progress: flight.on_ground ? 12 : 48,
-        status: flight.on_ground ? "Delayed" : "On time",
-      });
+    if (typeFilter === "all" || typeFilter === "air") {
+      for (const flight of data?.air_traffic?.flights?.slice(0, 3) ?? []) {
+        built.push({
+          id: flight.callsign || "AIR",
+          type: "air",
+          origin: coordLabel(flight.lat, flight.lng),
+          dest: flight.origin || "en-route",
+          eta: "live",
+          progress: flight.on_ground ? 12 : 48,
+          status: flight.on_ground ? "Delayed" : "On time",
+        });
+      }
     }
 
-    for (const vessel of data?.maritime_traffic?.data?.container_liners?.slice(0, 3) ?? []) {
-      built.push({
-        id: vessel.id || "SEA",
-        type: "sea",
-        origin: coordLabel(vessel.lat, vessel.lng),
-        dest: vessel.destination || "open-sea",
-        eta: "t+18h",
-        progress: 41,
-        status: "On time",
-      });
+    if (typeFilter === "all" || typeFilter === "sea") {
+      for (const vessel of data?.maritime_traffic?.data?.container_liners?.slice(0, 3) ?? []) {
+        built.push({
+          id: vessel.id || "SEA",
+          type: "sea",
+          origin: coordLabel(vessel.lat, vessel.lng),
+          dest: vessel.destination || "open-sea",
+          eta: "t+18h",
+          progress: 41,
+          status: "On time",
+        });
+      }
     }
 
-    for (const shipment of data?.land_traffic?.data?.active_land_shipments?.slice(0, 4) ?? []) {
-      built.push({
-        id: String(shipment.id ?? "LAND"),
-        type: "ground",
-        origin: coordLabel(shipment.lat, shipment.lng),
-        dest: coordLabel(
-          shipment.destination_lat as number | undefined,
-          shipment.destination_lng as number | undefined,
-        ),
-        eta: "t+6h",
-        progress: shipment.status === "in_transit" ? 72 : 28,
-        status: mapLandStatus(String(shipment.status ?? "")),
-      });
+    if (typeFilter === "all" || typeFilter === "ground") {
+      for (const shipment of data?.land_traffic?.data?.active_land_shipments?.slice(0, 4) ?? []) {
+        built.push({
+          id: String(shipment.id ?? "LAND"),
+          type: "ground",
+          origin: coordLabel(shipment.lat, shipment.lng),
+          dest: coordLabel(
+            shipment.destination_lat as number | undefined,
+            shipment.destination_lng as number | undefined,
+          ),
+          eta: "t+6h",
+          progress: shipment.status === "in_transit" ? 72 : 28,
+          status: mapLandStatus(String(shipment.status ?? "")),
+        });
+      }
     }
 
     return built.slice(0, 8);
-  }, [data]);
+  }, [data, typeFilter]);
+
+  const filterLabel =
+    typeFilter === "air"
+      ? "AIR ONLY"
+      : typeFilter === "sea"
+        ? "MARITIME ONLY"
+        : typeFilter === "ground"
+          ? "GROUND ONLY"
+          : "ALL MODES";
 
   return (
     <motion.div
@@ -95,6 +111,7 @@ export function FleetTable() {
             ACTIVE MISSIONS
           </div>
           <div className="mt-0.5 text-sm font-semibold">Priority fleet manifest</div>
+          <div className="mt-1 font-mono text-[9px] tracking-widest text-primary">{filterLabel}</div>
         </div>
         <button className="rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-1 font-mono text-[10px] tracking-widest text-muted-foreground transition-colors hover:text-foreground">
           VIEW ALL ({rows.length})
@@ -109,7 +126,11 @@ export function FleetTable() {
       </div>
       <div>
         {rows.length === 0 ? (
-          <div className="px-5 py-8 text-sm text-muted-foreground">Waiting for live fleet data…</div>
+          <div className="px-5 py-8 text-sm text-muted-foreground">
+            {typeFilter === "all"
+              ? "Waiting for live fleet data…"
+              : `No ${typeFilter} assets in range for this HQ.`}
+          </div>
         ) : (
           rows.map((r, i) => {
             const Icon = ICONS[r.type];

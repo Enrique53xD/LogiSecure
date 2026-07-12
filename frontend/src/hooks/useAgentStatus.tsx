@@ -5,6 +5,7 @@ export function useAgentStatus() {
   return useQuery({
     queryKey: ["logisecure", "agent-status"],
     queryFn: ({ signal }) => fetchAgentStatus(signal),
+    enabled: typeof window !== "undefined",
     refetchInterval: 60_000, 
     staleTime: 55_000,
     retry: 1,

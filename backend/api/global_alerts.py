@@ -69,6 +69,60 @@ _MOCK_THREATS: dict[str, list[dict]] = {
             "source": "logisecure_intel",
         },
     ],
+    "dubai": [
+        {
+            "event": "Red Sea corridor diversions increasing Jebel Ali congestion",
+            "severity": "HIGH",
+            "lat": 25.2,
+            "lng": 55.27,
+            "source": "logisecure_intel",
+        },
+    ],
+    "singapore": [
+        {
+            "event": "Strait of Malacca piracy advisory for southbound convoys",
+            "severity": "MEDIUM",
+            "lat": 1.35,
+            "lng": 103.82,
+            "source": "logisecure_intel",
+        },
+    ],
+    "tokyo": [
+        {
+            "event": "Typhoon watch issued for Pacific inbound air cargo lanes",
+            "severity": "HIGH",
+            "lat": 35.68,
+            "lng": 139.65,
+            "source": "logisecure_intel",
+        },
+    ],
+    "new_york": [
+        {
+            "event": "East Coast labour slowdown affecting Newark container terminal",
+            "severity": "CRITICAL",
+            "lat": 40.71,
+            "lng": -74.01,
+            "source": "logisecure_intel",
+        },
+    ],
+    "london": [
+        {
+            "event": "Channel crossing delays after North Atlantic storm system",
+            "severity": "MEDIUM",
+            "lat": 51.51,
+            "lng": -0.13,
+            "source": "logisecure_intel",
+        },
+    ],
+    "mumbai": [
+        {
+            "event": "Monsoon flooding disrupting Nhava Sheva port truck routes",
+            "severity": "HIGH",
+            "lat": 19.08,
+            "lng": 72.88,
+            "source": "logisecure_intel",
+        },
+    ],
 }
 
 _SEVERITY_RANK = {
@@ -145,6 +199,12 @@ _COUNTRY_BY_HQ = {
     "houston": "us",
     "sao_paulo": "br",
     "shanghai": "cn",
+    "dubai": "ae",
+    "singapore": "sg",
+    "tokyo": "jp",
+    "new_york": "us",
+    "london": "gb",
+    "mumbai": "in",
 }
 
 

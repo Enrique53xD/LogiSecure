@@ -11,6 +11,12 @@ export const LOGISECURE_LOCATIONS = [
   "houston",
   "sao_paulo",
   "shanghai",
+  "dubai",
+  "singapore",
+  "tokyo",
+  "new_york",
+  "london",
+  "mumbai",
 ] as const;
 
 export type LogisecureLocation = (typeof LOGISECURE_LOCATIONS)[number];
@@ -20,6 +26,28 @@ export const LOCATION_LABELS: Record<LogisecureLocation, string> = {
   houston: "Houston",
   sao_paulo: "São Paulo",
   shanghai: "Shanghai",
+  dubai: "Dubai",
+  singapore: "Singapore",
+  tokyo: "Tokyo",
+  new_york: "New York",
+  london: "London",
+  mumbai: "Mumbai",
+};
+
+export const LOCATION_COORDS: Record<
+  LogisecureLocation,
+  { lat: number; lng: number; radius_km: number }
+> = {
+  roterdam: { lat: 51.9244, lng: 4.4777, radius_km: 350 },
+  houston: { lat: 29.7604, lng: -95.3698, radius_km: 400 },
+  sao_paulo: { lat: -23.5505, lng: -46.6333, radius_km: 350 },
+  shanghai: { lat: 31.2304, lng: 121.4737, radius_km: 350 },
+  dubai: { lat: 25.2048, lng: 55.2708, radius_km: 400 },
+  singapore: { lat: 1.3521, lng: 103.8198, radius_km: 300 },
+  tokyo: { lat: 35.6762, lng: 139.6503, radius_km: 350 },
+  new_york: { lat: 40.7128, lng: -74.006, radius_km: 400 },
+  london: { lat: 51.5074, lng: -0.1278, radius_km: 350 },
+  mumbai: { lat: 19.076, lng: 72.8777, radius_km: 350 },
 };
 
 export type AirCourier = {

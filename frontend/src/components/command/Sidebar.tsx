@@ -13,22 +13,36 @@ import {
   Settings,
   Globe2,
 } from "lucide-react";
+import type { DashboardSection } from "@/lib/dashboard-sections";
 
-const NAV = [
-  { icon: LayoutGrid, label: "Overview", badge: null, path: "/" },
-  { icon: Map, label: "Live Map", badge: "LIVE", path: "/" },
-  { icon: Plane, label: "Air Fleet", badge: null, path: "/" },
-  { icon: Ship, label: "Maritime", badge: null, path: "/" },
-  { icon: Truck, label: "Ground", badge: null, path: "/" },
-  { icon: Satellite, label: "Telemetry", badge: null, path: "/" },
-  { icon: ShieldAlert, label: "Risk & Alerts", badge: "3", path: "/" },
+type NavItem = {
+  icon: typeof LayoutGrid;
+  label: string;
+  badge: string | null;
+  path?: string;
+  section?: DashboardSection;
+};
+
+const NAV: NavItem[] = [
+  { icon: LayoutGrid, label: "Overview", badge: null, section: "overview" },
+  { icon: Map, label: "Live Map", badge: "LIVE", section: "map" },
+  { icon: Plane, label: "Air Fleet", badge: null, section: "air" },
+  { icon: Ship, label: "Maritime", badge: null, section: "maritime" },
+  { icon: Truck, label: "Ground", badge: null, section: "ground" },
+  { icon: Satellite, label: "Telemetry", badge: null, section: "telemetry" },
+  { icon: ShieldAlert, label: "Risk & Alerts", badge: "3", section: "alerts" },
   { icon: Sparkles, label: "AI Copilot", badge: null, path: "/ai-copilot" },
-  { icon: Database, label: "Data Streams", badge: null, path: "/" },
+  { icon: Database, label: "Data Streams", badge: null, section: "streams" },
 ];
 
 export function Sidebar() {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
+  const activeSection =
+    currentPath === "/"
+      ? ((routerState.location.search as { section?: DashboardSection }).section ??
+        "overview")
+      : null;
 
   return (
     <aside className="glass hidden h-full w-[240px] shrink-0 flex-col rounded-2xl p-4 lg:flex">
@@ -53,14 +67,15 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-0.5">
         {NAV.map((item) => {
           const Icon = item.icon;
-          const isActive = item.path === currentPath;
-          return (
-            <Link
-              key={item.label}
-              to={item.path}
-              className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all hover:bg-white/5"
-              aria-current={isActive ? "page" : undefined}
-            >
+          const isActive = item.path
+            ? currentPath === item.path
+            : activeSection === item.section;
+
+          const className =
+            "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all hover:bg-white/5";
+
+          const content = (
+            <>
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
@@ -92,6 +107,31 @@ export function Sidebar() {
                   {item.badge}
                 </span>
               )}
+            </>
+          );
+
+          if (item.path) {
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                className={className}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {content}
+              </Link>
+            );
+          }
+
+          return (
+            <Link
+              key={item.label}
+              to="/"
+              search={item.section ? { section: item.section } : {}}
+              className={className}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {content}
             </Link>
           );
         })}

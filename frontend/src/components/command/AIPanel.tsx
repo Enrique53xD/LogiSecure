@@ -1,4 +1,6 @@
-import { useAgentStatus } from "@/hooks/useAgentStatus"; // ya jahan bhi hook rakha ho
+import { Link } from "@tanstack/react-router";
+import { Route, Sparkles } from "lucide-react";
+import { useAgentStatus } from "@/hooks/useAgentStatus";
 
 export function AIPanel() {
   const { data: status, isLoading, error } = useAgentStatus();
@@ -29,7 +31,7 @@ export function AIPanel() {
           />
           <span className="text-[15px] font-medium">{statusLabel}</span>
         </div>
-        <i className="ti ti-cpu text-lg text-[var(--text-muted)]" aria-hidden="true" />
+        <Sparkles className="h-4 w-4 text-[var(--text-muted)]" aria-hidden="true" />
       </div>
 
       {status && (
@@ -48,6 +50,20 @@ export function AIPanel() {
           </div>
         </div>
       )}
+
+      <div className="mt-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+        <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+          Dashboard shows live telemetry. AI reroute plans appear in{" "}
+          <span className="text-foreground font-medium">AI Copilot</span> after you submit an incident.
+        </p>
+        <Link
+          to="/ai-copilot"
+          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+        >
+          <Route className="h-3.5 w-3.5" />
+          Open AI Copilot for rerouting
+        </Link>
+      </div>
     </div>
   );
 }

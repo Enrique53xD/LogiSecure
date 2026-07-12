@@ -92,6 +92,7 @@ export function LogisecureProvider({ children }: { children: ReactNode }) {
   const query = useQuery({
     queryKey: ["logisecure", "sync", location],
     queryFn: ({ signal }) => fetchDashboardSync(location, signal),
+    enabled: typeof window !== "undefined",
     refetchInterval: 30_000,
     refetchOnWindowFocus: false,
     staleTime: 25_000,

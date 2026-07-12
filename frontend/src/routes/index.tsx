@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatedBackground } from "@/components/command/AnimatedBackground";
 import { Sidebar } from "@/components/command/Sidebar";
 import { TopBar } from "@/components/command/TopBar";
@@ -14,13 +14,35 @@ import { Notifications } from "@/components/command/Notifications";
 import { LoadingScreen } from "@/components/command/LoadingScreen";
 import { WeatherWidget } from "@/components/command/WeatherWidget";
 import { LogisecureProvider } from "@/hooks/useLogisecure";
+import {
+  dashboardSearchSchema,
+  fleetFilterForSection,
+  mapFilterForSection,
+  scrollToDashboardSection,
+  type DashboardSection,
+} from "@/lib/dashboard-sections";
 
 export const Route = createFileRoute("/")({
+  validateSearch: dashboardSearchSchema,
   component: Index,
 });
 
+function sectionHighlight(active: DashboardSection | undefined, target: DashboardSection) {
+  return active === target ? "ring-2 ring-primary/35 ring-offset-2 ring-offset-background" : "";
+}
+
 function Index() {
   const [ready, setReady] = useState(false);
+  const { section } = Route.useSearch();
+  const activeSection = section ?? "overview";
+  const mapFilter = mapFilterForSection(section);
+  const fleetFilter = fleetFilterForSection(section);
+
+  useEffect(() => {
+    if (!ready || !section) return;
+    const timer = window.setTimeout(() => scrollToDashboardSection(section), 120);
+    return () => window.clearTimeout(timer);
+  }, [ready, section]);
 
   return (
     <LogisecureProvider>
@@ -42,8 +64,11 @@ function Index() {
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <TopBar />
 
-          {/* Hero: KPIs */}
-          <section aria-label="Fleet KPIs">
+          <section
+            id="section-overview"
+            aria-label="Fleet KPIs"
+            className={`scroll-mt-28 rounded-2xl transition-shadow ${sectionHighlight(activeSection, "overview")}`}
+          >
             <div className="mb-2 flex items-end justify-between px-1">
               <div>
                 <div className="font-mono text-[10px] tracking-widest text-primary/80">
@@ -66,23 +91,41 @@ function Index() {
             <KPIGrid />
           </section>
 
-          {/* Map + AI */}
-          <section className="grid gap-3 xl:grid-cols-[1fr_380px]" aria-label="Operations map">
+          <section
+            id="section-operations"
+            className={`grid scroll-mt-28 gap-3 rounded-2xl transition-shadow xl:grid-cols-[1fr_380px] ${sectionHighlight(activeSection, "map") || sectionHighlight(activeSection, "air") || sectionHighlight(activeSection, "maritime")}`}
+            aria-label="Operations map"
+          >
             <div className="h-[560px] xl:h-[620px]">
-              <CityMap2D />
+              <CityMap2D layerFilter={mapFilter} />
             </div>
             <div className="flex flex-col gap-3">
               <AIPanel />
               <WeatherWidget />
-              <GlobalAlerts />
+              <div
+                id="section-alerts"
+                className={`scroll-mt-28 rounded-2xl transition-shadow ${sectionHighlight(activeSection, "alerts")}`}
+              >
+                <GlobalAlerts />
+              </div>
               <RegionChart />
             </div>
           </section>
 
-          {/* Charts + table */}
-          <section className="grid gap-3 xl:grid-cols-[1fr_1fr]">
-            <ThroughputChart />
-            <FleetTable />
+          <section
+            id="section-telemetry"
+            className={`grid scroll-mt-28 gap-3 rounded-2xl transition-shadow xl:grid-cols-[1fr_1fr] ${sectionHighlight(activeSection, "telemetry")}`}
+            aria-label="Telemetry charts"
+          >
+            <div id="section-streams" className={`scroll-mt-28 rounded-2xl transition-shadow ${sectionHighlight(activeSection, "streams")}`}>
+              <ThroughputChart />
+            </div>
+            <div
+              id="section-fleet"
+              className={`scroll-mt-28 rounded-2xl transition-shadow ${sectionHighlight(activeSection, "ground")}`}
+            >
+              <FleetTable typeFilter={fleetFilter} />
+            </div>
           </section>
 
           <footer className="mt-2 flex items-center justify-between px-1 pb-4 font-mono text-[10px] tracking-widest text-muted-foreground">

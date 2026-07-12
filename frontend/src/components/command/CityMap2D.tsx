@@ -1,33 +1,52 @@
 import { useEffect, useRef, useState } from "react";
 import { useLogisecure } from "@/hooks/useLogisecure";
-import { LOGISECURE_LOCATIONS, LOCATION_LABELS, type LogisecureLocation } from "@/lib/logisecure-api";
+import {
+  LOGISECURE_LOCATIONS,
+  LOCATION_COORDS,
+  LOCATION_LABELS,
+  type LogisecureLocation,
+} from "@/lib/logisecure-api";
+import type { MapLayerFilter } from "@/lib/dashboard-sections";
 import { ChevronDown, X, Plane, Ship } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
-const HQ_COORDS: Record<LogisecureLocation, { lat: number; lng: number }> = {
-  roterdam: { lat: 51.9225, lng: 4.4791 },
-  houston: { lat: 29.7604, lng: -95.3698 },
-  sao_paulo: { lat: -23.5505, lng: -46.6333 },
-  shanghai: { lat: 31.2304, lng: 121.4737 },
-};
-
 type SelectedItem = { kind: "air"; data: any } | { kind: "sea"; data: any } | null;
 
-export function CityMap2D() {
+function hqDivIcon(label: string, selected: boolean) {
+  const size = selected ? 18 : 10;
+  const glow = selected
+    ? "0 0 18px rgba(56,189,248,0.95), 0 0 36px rgba(56,189,248,0.45)"
+    : "0 0 6px rgba(148,163,184,0.5)";
+  const bg = selected ? "#38bdf8" : "#64748b";
+  const ring = selected
+    ? `<span style="position:absolute;inset:-10px;border:2px solid rgba(56,189,248,0.55);border-radius:9999px;animation:pulse-hq 2s ease-out infinite;"></span>`
+    : "";
+  const name = selected
+    ? `<span style="position:absolute;left:50%;top:-26px;transform:translateX(-50%);white-space:nowrap;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.82);border:1px solid rgba(56,189,248,0.45);color:#e2e8f0;font:600 11px/1.4 Inter,sans-serif;">${label}</span>`
+    : "";
+
+  return `<div style="position:relative;width:${size}px;height:${size}px;">
+    ${ring}
+    <span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:${bg};border:2px solid white;box-shadow:${glow};"></span>
+    ${name}
+  </div>`;
+}
+
+export function CityMap2D({ layerFilter = "all" }: { layerFilter?: MapLayerFilter }) {
   const { data, location, setLocation, backendOnline } = useLogisecure();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const hqMarkersRef = useRef<any[]>([]);
+  const highlightCircleRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
   const [selected, setSelected] = useState<SelectedItem>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mapReady, setMapReady] = useState(false);
 
-  const air = data?.air_traffic?.flights ?? [];
-  const sea = data?.maritime_traffic?.data?.container_liners ?? [];
+  const air = layerFilter === "sea" ? [] : (data?.air_traffic?.flights ?? []);
+  const sea = layerFilter === "air" ? [] : (data?.maritime_traffic?.data?.container_liners ?? []);
 
-  // Leaflet ko sirf browser mein dynamically import karein (SSR crash fix)
-  // Marker cluster HATA DI GAYI — woh "L is not defined" crash de rahi thi
   useEffect(() => {
     let cancelled = false;
     import("leaflet").then((leafletModule) => {
@@ -40,7 +59,6 @@ export function CityMap2D() {
     };
   }, []);
 
-  // Map initialize — sirf ek baar
   useEffect(() => {
     if (!mapReady || !mapContainerRef.current || mapRef.current) return;
     const L = leafletRef.current;
@@ -49,7 +67,7 @@ export function CityMap2D() {
       zoomControl: true,
       minZoom: 2,
       worldCopyJump: true,
-    }).setView([HQ_COORDS[location].lat, HQ_COORDS[location].lng], 6);
+    }).setView([LOCATION_COORDS[location].lat, LOCATION_COORDS[location].lng], 6);
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
@@ -72,10 +90,10 @@ export function CityMap2D() {
     };
   }, [mapReady]);
 
-  // Location badlay to camera fly kare
   useEffect(() => {
     if (mapRef.current) {
-      mapRef.current.flyTo([HQ_COORDS[location].lat, HQ_COORDS[location].lng], 6, { duration: 1.2 });
+      const coords = LOCATION_COORDS[location];
+      mapRef.current.flyTo([coords.lat, coords.lng], 6, { duration: 1.2 });
     }
   }, [location]);
 
@@ -103,41 +121,81 @@ export function CityMap2D() {
     });
   }
 
- // Markers update — SEEDHE map pe add hote hain, koi clustering nahi
- useEffect(() => {
-  const map = mapRef.current;
-  const L = leafletRef.current;
-  console.log("MARKER EFFECT RAN:", { map: !!map, L: !!L, airCount: air.length, seaCount: sea.length });
-  if (!map || !L) return;
+  // HQ city markers — all megapolises, selected one highlighted
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L) return;
 
+    hqMarkersRef.current.forEach((m) => m.remove());
+    hqMarkersRef.current = [];
+
+    if (highlightCircleRef.current) {
+      highlightCircleRef.current.remove();
+      highlightCircleRef.current = null;
+    }
+
+    const selectedCoords = LOCATION_COORDS[location];
+    highlightCircleRef.current = L.circle([selectedCoords.lat, selectedCoords.lng], {
+      radius: selectedCoords.radius_km * 1000,
+      color: "#38bdf8",
+      weight: 2,
+      fillColor: "#38bdf8",
+      fillOpacity: 0.12,
+      dashArray: "6 8",
+    }).addTo(map);
+
+    LOGISECURE_LOCATIONS.forEach((loc) => {
+      const coords = LOCATION_COORDS[loc];
+      const isSelected = loc === location;
+      const marker = L.marker([coords.lat, coords.lng], {
+        icon: L.divIcon({
+          html: hqDivIcon(LOCATION_LABELS[loc], isSelected),
+          className: "",
+          iconSize: isSelected ? [18, 18] : [10, 10],
+          iconAnchor: isSelected ? [9, 9] : [5, 5],
+        }),
+        zIndexOffset: isSelected ? 1000 : 200,
+      }).addTo(map);
+
+      marker.on("click", () => setLocation(loc));
+      hqMarkersRef.current.push(marker);
+    });
+  }, [location, mapReady, setLocation]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = leafletRef.current;
+    if (!map || !L) return;
 
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    
-console.log("First air entry:", air[0]);
-air.forEach((f: any) => {
-  // Backend kabhi "lat/lng" deta hai, kabhi "latitude/longitude" —
-  // dono support kar rahe hain taake dono format chal sakein
-  const lat = typeof f.lat === "number" ? f.lat : f.latitude;
-  const lng = typeof f.lng === "number" ? f.lng : f.longitude;
-  if (typeof lat !== "number" || typeof lng !== "number") return;
+    air.forEach((f: any) => {
+      const lat = typeof f.lat === "number" ? f.lat : f.latitude;
+      const lng = typeof f.lng === "number" ? f.lng : f.longitude;
+      if (typeof lat !== "number" || typeof lng !== "number") return;
 
-  const marker = L.marker([lat, lng], { icon: planeDivIcon() }).addTo(map);
-  marker.on("click", () => setSelected({ kind: "air", data: { ...f, lat, lng, altitude: f.altitude ?? f.baro_altitude } }));
-  markersRef.current.push(marker);
-});
+      const marker = L.marker([lat, lng], { icon: planeDivIcon() }).addTo(map);
+      marker.on("click", () =>
+        setSelected({ kind: "air", data: { ...f, lat, lng, altitude: f.altitude ?? f.baro_altitude } }),
+      );
+      markersRef.current.push(marker);
+    });
 
-sea.forEach((s: any) => {
-  const lat = typeof s.lat === "number" ? s.lat : s.latitude;
-  const lng = typeof s.lng === "number" ? s.lng : s.longitude;
-  if (typeof lat !== "number" || typeof lng !== "number") return;
+    sea.forEach((s: any) => {
+      const lat = typeof s.lat === "number" ? s.lat : s.latitude;
+      const lng = typeof s.lng === "number" ? s.lng : s.longitude;
+      if (typeof lat !== "number" || typeof lng !== "number") return;
 
-  const marker = L.marker([lat, lng], { icon: shipDivIcon() }).addTo(map);
-  marker.on("click", () => setSelected({ kind: "sea", data: { ...s, lat, lng } }));
-  markersRef.current.push(marker);
-});
-  }, [air, sea, mapReady]);
+      const marker = L.marker([lat, lng], { icon: shipDivIcon() }).addTo(map);
+      marker.on("click", () => setSelected({ kind: "sea", data: { ...s, lat, lng } }));
+      markersRef.current.push(marker);
+    });
+  }, [air, sea, mapReady, layerFilter]);
+
+  const layerLabel =
+    layerFilter === "air" ? "AIR LAYER" : layerFilter === "sea" ? "MARITIME LAYER" : "ALL LAYERS";
 
   const selectCity = (loc: LogisecureLocation) => {
     setLocation(loc);
@@ -146,6 +204,14 @@ sea.forEach((s: any) => {
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl">
+      <style>{`
+        @keyframes pulse-hq {
+          0% { transform: scale(0.85); opacity: 0.9; }
+          70% { transform: scale(1.35); opacity: 0; }
+          100% { transform: scale(1.35); opacity: 0; }
+        }
+      `}</style>
+
       <div className="absolute top-4 left-4 z-[1000] w-56">
         <button
           onClick={() => setDropdownOpen((v) => !v)}
@@ -156,13 +222,13 @@ sea.forEach((s: any) => {
         </button>
 
         {dropdownOpen && (
-          <div className="mt-1 overflow-hidden rounded-lg border border-white/10 bg-black/90 backdrop-blur-md">
+          <div className="mt-1 max-h-64 overflow-y-auto rounded-lg border border-white/10 bg-black/90 backdrop-blur-md">
             {LOGISECURE_LOCATIONS.map((loc) => (
               <div
                 key={loc}
                 onClick={() => selectCity(loc)}
                 className={`cursor-pointer px-3 py-2 text-sm hover:bg-white/10 ${
-                  loc === location ? "bg-white/5 text-primary" : "text-white"
+                  loc === location ? "bg-primary/15 text-primary font-semibold" : "text-white"
                 }`}
               >
                 {LOCATION_LABELS[loc]}
@@ -172,8 +238,20 @@ sea.forEach((s: any) => {
         )}
       </div>
 
-      <div className="absolute top-4 right-4 z-[1000] font-mono text-[10px] tracking-widest text-muted-foreground">
-        {backendOnline ? "LIVE" : "OFFLINE"} · {air.length} AIR · {sea.length} SEA
+      <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-1">
+        <span className="font-mono text-[10px] tracking-widest text-muted-foreground">
+          {backendOnline ? "LIVE" : "OFFLINE"} · {air.length} AIR · {sea.length} SEA · {LOGISECURE_LOCATIONS.length} HQs
+        </span>
+        <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[9px] tracking-widest text-primary">
+          {layerLabel}
+        </span>
+      </div>
+
+      <div className="absolute bottom-4 left-4 z-[1000] max-w-xs rounded-lg border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
+        <div className="font-mono text-[9px] tracking-widest text-primary">OPERATIONS MAP</div>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          Geographic view of the selected HQ: live air &amp; sea traffic, coverage zone, and nearby assets for situational awareness.
+        </p>
       </div>
 
       <div ref={mapContainerRef} className="h-full w-full" style={{ background: "#0a0e17" }} />
